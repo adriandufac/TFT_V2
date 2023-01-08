@@ -1,0 +1,17 @@
+
+
+FRONT                 |      BACK         |       BDD                                            		   | SCRIPTS API +  INSERT EN BDD + fichier config (API key)
+HTML JS 						 une table joueurs: PUUID / Région                      		      get top 500 joueurs/Régions + INSERT en base
+							 une table GamesCurrent: matchIDS current patch          		      get X GAMES DES meilleurs JOUEURS de chaque région + insert en base avec check de si ca existe déja
+							 une table GamesPrevious: matchIDs previous patch	                  Script qui extrait les ID de la table ID, pour chaque ID vérifie si elle est dans la table details sinon call get matchdetails + INSERTION des details en base 
+							 une table detailsGame:                                                 Script de pattern recognisation avec les data des games qui reconnait les compo et fait des stats puis les insert en BDD
+							 matchID/joueur PUUID/CLASSEMENT/AUGMENT1/AUGMENT2/AUGMENT3             => Créer les pts avec les origine/class1/class2 des champions de la compo pr chaque personne de chaque game (8xnbGame pts)
+							 Table champion ID(nom api)/Nom(nom site)/Origine/Class1/Class2/Cost
+
+							 Une table Champ game :
+							 matchID/joueur PUIDD/Champ ID /LVL/ITEM1/ITEM2/ITEM3
+							 Une table Compo :
+							 Nom compo/PICK RATE / TOP4 RATE / WINRATE
+							 		   
+
+ 
