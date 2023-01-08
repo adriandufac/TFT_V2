@@ -1,6 +1,7 @@
 package BO;
 
 import DAL.leagueDAO;
+import Utils.regionUtils;
 import com.gargoylesoftware.htmlunit.*;
 import com.google.gson.*;
 
@@ -29,9 +30,7 @@ public class getTop{
     final static String sumInfoByNameEUW = "https://euw1.api.riotgames.com/tft/summoner/v1/summoners/by-name/";
     final static String sumInfoByNameKR = "https://kr.api.riotgames.com/tft/summoner/v1/summoners/by-name/";
 
-    static public enum region {
-        EUW,KR,NA
-    }
+
 
     final static Map<String, String> headerAPI = new HashMap<String, String>();
 
@@ -44,7 +43,7 @@ public class getTop{
 
     }
 
-    private void getChallengers(region r) throws IOException {
+    private void getChallengers(regionUtils.region r) throws IOException {
 
     try (WebClient webClient = new WebClient()) {
         WebRequest webRequest;
@@ -136,7 +135,7 @@ public class getTop{
 
     }
 
-    public void clearTable(region r){
+    public void clearTable(Utils.regionUtils.region r){
         
     }
 
@@ -173,7 +172,7 @@ public class getTop{
     public static void main(String[] args){
         getTop test = new getTop();
         try {
-            test.getChallengers(region.NA);
+            test.getChallengers(Utils.regionUtils.region.NA);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
