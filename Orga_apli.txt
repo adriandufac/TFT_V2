@@ -14,4 +14,6 @@ HTML JS 						 une table joueurs: PUUID / Région                      		      g
 							 Nom compo/PICK RATE / TOP4 RATE / WINRATE
 							 		   
 
+IMPROVE : clé API ds un fichier de config
+
  

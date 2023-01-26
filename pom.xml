@@ -79,7 +79,7 @@
                             <addClasspath>true</addClasspath>
                             <!-- here we specify that we want to use the main method within the App class -->
                             <!-- Voir si on peut lancer differents mains en fnct d'arguments ?-->
-                            <mainClass>BO.getMAtchesFromRegion</mainClass>
+                            <mainClass>Scripts</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

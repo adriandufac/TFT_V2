@@ -1,6 +1,5 @@
 package BO;
 
-import DAL.leagueDAO;
 import Utils.regionUtils;
 import com.gargoylesoftware.htmlunit.*;
 import com.google.gson.*;
@@ -16,8 +15,10 @@ import java.util.Map.Entry;
 public class getTop{
 
     private boolean jsonSerializeNulls = true;
+
+    public int cptrequest;
     
-    final static String apiKey ="RGAPI-92e7ff3c-bfbe-46d7-b65c-069d15d16b5c";
+    final static String apiKey ="RGAPI-d19ed59e-5d63-41e7-9a2c-4240f8617c6c";
 
     final static String challengersEUW = "https://euw1.api.riotgames.com/tft/league/v1/challenger";
     final static String challengersNA = "https://na1.api.riotgames.com/tft/league/v1/challenger";
@@ -32,18 +33,18 @@ public class getTop{
 
 
 
-    final static Map<String, String> headerAPI = new HashMap<String, String>();
+    final static Map<String, String> headerAPI = new HashMap<>();
 
     public getTop(){
         headerAPI.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36");
-        headerAPI.put("Accept-Language","fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7");
+        headerAPI.put("Accept-Language","fr-FR,fr;q=0.6");
         headerAPI.put("Accept-Charset","application/x-www-form-urlencoded; charset=UTF-8");
         headerAPI.put("Origin","https://developer.riotgames.com");
         headerAPI.put("X-Riot-Token",apiKey);
-
+        cptrequest = 1;
     }
 
-    private void getChallengers(regionUtils.region r) throws IOException {
+    public void getChallengers(regionUtils.region r) throws IOException {
 
     try (WebClient webClient = new WebClient()) {
         WebRequest webRequest;
@@ -111,32 +112,45 @@ public class getTop{
                 try{
                     Page page2 = webClient.getPage(webRequest2);
                     String jsonResponse2;
+
                     playerFromApi pla;
                     jsonResponse2 = page2.getWebResponse().getContentAsString();
+                    System.out.println("REQUETE NUM : " +cptrequest);
+                    System.out.println(webRequest2);
+                    System.out.println(jsonResponse2);
                     pla = gson.fromJson(jsonResponse2, playerFromApi.class);
                     player.setPUUID(pla.puuid);
                     player.setRegion(r.toString());
+                    System.out.println(player.getName());
                     System.out.println(player.PUUID);
                     System.out.println(player.region);
+                    cptrequest++;
+                    if (cptrequest%100 == 0){
+                        System.out.println(" PAUSE 2 MIN");
+                        Thread.sleep(120000);
+                    }
+
                 }
                 catch(FailingHttpStatusCodeException e){
                     System.out.println("BUG");
                     
-                }             
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
         }
-        leagueDAO leagueDAO = new leagueDAO();
-        leagueDAO.insert(challs);
+        /*leagueDAO leagueDAO = new leagueDAO();
+        leagueDAO.insert(challs);*/
         System.out.println("\n yooooooooooooooooooo n");
         } catch (IOException e) {
-            //
+            System.out.println("BUG");
         }
 
 
 
     }
 
-    public void clearTable(Utils.regionUtils.region r){
-        
+    public void clearTable(){
+        //TODO => vide la table joueurs
     }
 
     protected Gson gson(){
@@ -165,18 +179,6 @@ public class getTop{
 
     public void setJsonSerializeNulls(boolean jsonSerializeNulls) {
         this.jsonSerializeNulls = jsonSerializeNulls;
-    }
-
-
-
-    public static void main(String[] args){
-        getTop test = new getTop();
-        try {
-            test.getChallengers(Utils.regionUtils.region.NA);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
 }

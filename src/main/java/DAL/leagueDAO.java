@@ -2,24 +2,22 @@ package DAL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import BO.leagueClass;
-import BO.player;
 
 public class leagueDAO {
 
     private static final String insertLeague = "insert into Joueurs (PUUID,Region) values (?,?)";
-	private static final String selectPUUIDFromRegion = "select PUUID from Joueurs WHERE Region = ?";
+	private static final String selectPUUIDFromRegion = "SELECT PUUID from Joueurs WHERE Region = ?";
 
-    public void  insert(leagueClass league ){
-        Connection cnx = null;
-		PreparedStatement rqt = null;
-		//ResultSet rs = null;
+    public void  insert(leagueClass league ) throws SQLException {
+        Connection cnx= database.openCo();
+		PreparedStatement rqt;
 		try {
-			cnx = database.openCo();
 			rqt = cnx.prepareStatement(insertLeague);
-			//TODO Boucler sur ttes les entrées
 			for (BO.player player : league.entries){
 				rqt.setString(1,player.PUUID);
 				rqt.setString(2, player.region);
@@ -28,25 +26,34 @@ public class leagueDAO {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
     	}
+		finally {
+			cnx.close();
+		}
 	}
 
-	public List<String> selectPUUIDSFromRegion (Utils.regionUtils.region r){
-		Connection cnx = null;
-		PreparedStatement rqt = null;
-		List<String> PUUIDS= null;
-		ResultSet rs = null;
+	public List<String> selectPUUIDSFromRegion (Utils.regionUtils.region r) throws SQLException {
+		Connection cnx = database.openCo();;
+		PreparedStatement rqt;
+		List<String> PUUIDS= new ArrayList<>();;
+		ResultSet rs;
 		try {
-			cnx = database.openCo();
 			rqt = cnx.prepareStatement(selectPUUIDFromRegion);
 			rqt.setString(1, r.toString());
+			System.out.println(rqt);
 			rs = rqt.executeQuery();
+
 			while (rs.next()){
-				System.out.println(rs.getString(1));
+				System.out.println("****************"+rs.getString(1)+"*********");
+				System.out.println('\n');
 				PUUIDS.add(rs.getString("PUUID"));
 			}
-
+			rs.close();
+			rqt.close();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
+		}
+		finally {
+			cnx.close();
 		}
 		return PUUIDS;
 	}
