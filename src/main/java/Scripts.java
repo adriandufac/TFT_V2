@@ -4,6 +4,7 @@ import Utils.regionUtils;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Scripts {
@@ -24,6 +25,15 @@ public class Scripts {
                 List<String> PUUIDS = test2.getPUUIDFromDB(regionUtils.region.NA);
                 test2.getMatchs(regionUtils.region.NA,20,PUUIDS);
             } catch (MalformedURLException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if ( "getMatchesDetails".equals(args[0])) {
+            getMatchesDetailsFromRegion test3 = new getMatchesDetailsFromRegion();
+            try {
+                test3.getMatchDetails(regionUtils.region.NA);
+            } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
         }

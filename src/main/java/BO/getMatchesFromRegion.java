@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class getMatchesFromRegion {
     private boolean jsonSerializeNulls = true;
-    private ArrayList<String> matchesAll = new ArrayList<>();
+    private ArrayList<match> matchesAll = new ArrayList<>();
     final static String apiKey ="RGAPI-d19ed59e-5d63-41e7-9a2c-4240f8617c6c";
     final static String baseURL = "api.riotgames.com/tft/match/v1/matches/by-puuid/";
     public int cptrequest;
@@ -38,7 +38,7 @@ public class getMatchesFromRegion {
     }
     public void getMatchs(regionUtils.region r, int nbMatchsPerPlayer, List<String> PUUIDS) throws MalformedURLException {
 
-        String URL = getURLfromRegion(r);
+        String URL = regionUtils.getURLfromRegion(r,baseURL);
         Gson gson = gson();
         try (WebClient webClient = new WebClient()) {
             WebRequest webRequest;
@@ -60,10 +60,14 @@ public class getMatchesFromRegion {
                 System.out.println(jsonResponse);
                 Type listType = new TypeToken<ArrayList<String>>(){}.getType();
                 ArrayList<String> list = gson.fromJson(jsonResponse, listType);
-                this.matchesAll.clear();
-                this.matchesAll.addAll(list);
+                for (String match:list) {
+                    match m = new match(match,r);
+                    System.out.println(m.r.toString());
+                    matchesAll.add(m);
+                }
                 matchesDAO matchesDAO = new matchesDAO();
                 matchesDAO.insert(matchesAll);
+                matchesAll.clear();
                 cptrequest++;
                 if (cptrequest%100 == 0){
                     System.out.println(" PAUSE 2 MIN");
@@ -80,18 +84,7 @@ public class getMatchesFromRegion {
         return leagueDAO.selectPUUIDSFromRegion(r);
     }
 
-    private String getURLfromRegion(regionUtils.region r) {
-        switch (r) {
-            case EUW :
-                return "https://europe." + baseURL;
-            case NA :
-                return "https://americas." + baseURL;
-            case KR :
-                return "https://asia." + baseURL;
-            default:
-                return "https://europe." + baseURL;
-        }
-    }
+
     protected Gson gson(){
 
         // serialiazeNulls is required otherwise null values

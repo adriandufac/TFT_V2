@@ -1,5 +1,7 @@
 package DAL;
 
+import BO.match;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,16 +12,17 @@ import java.util.List;
 
 public class matchesDAO {
 
-    private static final String insertMatch = "insert into MatchsIDCurrent (MatchID) values (?)";
-    private static final String selectMatchs ="SELECT matchID from matchsIDCurrent WHERE Region = ?";
-    public void  insert(ArrayList<String> matches ) throws SQLException {
+    private static final String insertMatch = "insert into MatchsIDCurrent (MatchID, Region) values (?,?)";
+    private static final String selectMatchs ="SELECT matchID from MatchsIDCurrent WHERE Region = ?";
+    public void  insert(ArrayList<match> matches ) throws SQLException {
         Connection cnx = database.openCo();
         PreparedStatement rqt;
         try {
 
             rqt = cnx.prepareStatement(insertMatch);
-            for (String match : matches){
-                rqt.setString(1,match);
+            for (match match : matches){
+                rqt.setString(1,match.matchID);
+                rqt.setString(2,match.r.toString());
                 rqt.executeUpdate();
             }
         } catch (Exception e) {

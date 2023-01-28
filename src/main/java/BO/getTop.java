@@ -1,5 +1,6 @@
 package BO;
 
+import ApiObjects.playerFromApi;
 import Utils.regionUtils;
 import com.gargoylesoftware.htmlunit.*;
 import com.google.gson.*;

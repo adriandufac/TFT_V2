@@ -6,14 +6,19 @@ HTML JS 						 une table joueurs: PUUID / Région                      		      g
 							 une table GamesPrevious: matchIDs previous patch	                  Script qui extrait les ID de la table ID, pour chaque ID vérifie si elle est dans la table details sinon call get matchdetails + INSERTION des details en base 
 							 une table detailsGame:                                                 Script de pattern recognisation avec les data des games qui reconnait les compo et fait des stats puis les insert en BDD
 							 matchID/joueur PUUID/CLASSEMENT/AUGMENT1/AUGMENT2/AUGMENT3             => Créer les pts avec les origine/class1/class2 des champions de la compo pr chaque personne de chaque game (8xnbGame pts)
-							 Table champion ID(nom api)/Nom(nom site)/Origine/Class1/Class2/Cost
+							 Table champion: ID(nom api)/Nom(nom site)/Origine/Class1/Class2/Cost
 
 							 Une table Champ game :
 							 matchID/joueur PUIDD/Champ ID /LVL/ITEM1/ITEM2/ITEM3
+				
 							 Une table Compo :
 							 Nom compo/PICK RATE / TOP4 RATE / WINRATE
 							 		   
 
-IMPROVE : clé API ds un fichier de config
-
+IMPROVE :
+clé API ds un fichier de config
+methode gson ds chaque fichier => faire une classe abstract avec la methode et les autres extends de celle la ou un util avec la fonction?
+La création du header qui revient ds chaque fichier => un util ou classe abstract
+meilleur gestion des exceptions
+REFLECHIR A inserer un ID plutot qu'une liste d'ID pour les matchID ?
  
