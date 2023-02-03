@@ -20,5 +20,8 @@ clé API ds un fichier de config
 methode gson ds chaque fichier => faire une classe abstract avec la methode et les autres extends de celle la ou un util avec la fonction?
 La création du header qui revient ds chaque fichier => un util ou classe abstract
 meilleur gestion des exceptions
-REFLECHIR A inserer un ID plutot qu'une liste d'ID pour les matchID ?
- 
+ATTENTION MA METHODE NE COMPTE PAS LES SPATS -_- =< prendre les traits directement ds la game et non sur les champ
+
+ELECT DetailsGame.MatchID, DetailsGame.PUUID, Classement,Trait1,COUNT(Trait1),Trait2,COUNT(Trait2),Trait3,COUNT(Trait3) FROM DetailsGame JOIN ChampGame ON DetailsGame.MatchID = ChampGame.MatchID AND DetailsGame.PUUID= ChampGame.PUUID JOIN Champion ON ChampGame.NomAPI = Champion.NomAPI GROUP BY MatchID,PUUID,Trait1;
+
+OxForce Mascot Aegis SpellSlinger Arsenal Sureshot LaserCorps Recon Threat Admin Renegade Brawler Ace MechPrime StarGuardian Prankster Underground Corrupted Duelist Civilian Supers Forecaster AnimaSquad Gadgeteen Heart Defender Hacker

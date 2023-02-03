@@ -1,9 +1,9 @@
 package ApiObjects;
 
 public class traitFromApi {
-    String name;
-    int num_units;
-    int style;
-    int tier_current;
-    int  tier_total;
+    public String name;
+    public int num_units;
+    public int style;
+    public int tier_current;
+    public int  tier_total;
 }

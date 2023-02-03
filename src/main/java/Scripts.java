@@ -1,4 +1,5 @@
 import BO.*;
+import DAL.CompAnalyses;
 import Utils.regionUtils;
 
 import java.io.IOException;
@@ -34,6 +35,15 @@ public class Scripts {
             try {
                 test3.getMatchDetails(regionUtils.region.NA);
             } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if ( "getComps".equals(args[0])) {
+            CompAnalyses test4 = new CompAnalyses();
+            try {
+                test4.cluster(regionUtils.region.NA);
+            } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
