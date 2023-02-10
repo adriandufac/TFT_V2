@@ -1,15 +1,15 @@
 import BO.*;
-import DAL.CompAnalyses;
+import BO.CompAnalyses;
+import DAL.leagueDAO;
 import Utils.regionUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Scripts {
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
 
         if ( "getTop".equals(args[0])) {
             getTop test = new getTop();
@@ -22,8 +22,9 @@ public class Scripts {
 
         if ( "getMatches".equals(args[0])) {
             getMatchesFromRegion test2 = new getMatchesFromRegion();
+            leagueDAO leagueDAO = new leagueDAO();
             try {
-                List<String> PUUIDS = test2.getPUUIDFromDB(regionUtils.region.NA);
+                List<String> PUUIDS = leagueDAO.selectPUUIDSFromRegion(regionUtils.region.NA);
                 test2.getMatchs(regionUtils.region.NA,20,PUUIDS);
             } catch (MalformedURLException | SQLException e) {
                 throw new RuntimeException(e);
@@ -47,6 +48,5 @@ public class Scripts {
                 throw new RuntimeException(e);
             }
         }
-
     }
 }

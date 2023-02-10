@@ -1,24 +1,26 @@
 package DAL;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.*;
+import java.util.Properties;
 
 
 public class database{
-   
-   static final String DB_URL = "jdbc:mysql://localhost:3306/TFT";
-   static final String USER = "root";
-   static final String PASS = "Ulkaline35!";
+   private static final Properties prop = new Properties();
    static {
-		
+       try {
+           prop.load(new FileInputStream("src/main/java/apikey.properties"));
+       } catch (IOException e) {
+           throw new RuntimeException(e);
+       }
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
+			Class.forName(prop.getProperty("DRIVER"));
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}		
    }
-   public static Connection openCo() throws SQLException{
-
-         return DriverManager.getConnection(DB_URL, USER, PASS); 
-    
+   protected static Connection openCo() throws SQLException {
+       return DriverManager.getConnection(prop.getProperty("URL"),prop.getProperty("USER") ,prop.getProperty("PASS"));
    }
     
 }

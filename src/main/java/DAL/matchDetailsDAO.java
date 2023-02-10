@@ -2,12 +2,18 @@ package DAL;
 
 import ApiObjects.matchFromApi;
 import ApiObjects.traitFromApi;
+import BO.gameComp;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Properties;
 
 public class matchDetailsDAO {
     private static final String insertMatchDetailsToDetailsGame = "insert into DetailsGame (MatchID,PUUID,Classement,Augment1,Augment2,Augment3,"+
@@ -16,8 +22,12 @@ public class matchDetailsDAO {
             "                                                      values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     private static final String insertMatchDetailsToChampGame = "insert into ChampGame(MatchID,PUUID,NomAPI,tier,Item1,Item2,Item3)" +
                                                                 "values(?,?,?,?,?,?,?)";
-    private HashMap<String,Integer> TabTraits = new LinkedHashMap<>();
-    private static HashMap<String,String> traitsFromAPIToDatabase = new HashMap<>();
+
+    private static final String selectGamesWithTraits = "SELECT MatchID,PUUID,Classement,Ace,Admin,Aegis,AnimaSquad,Arsenal,Brawler,Civilian,Corrupted," +
+            "Defender,Duelist,Forecaster,Gadgeteen,Hacker,Heart,LaserCorps,Mascot,MechPrime,OxForce,Prankster,Recon,Renegade,SpellSlinger" +
+            ",StarGuardian,Supers,Sureshot,Threat,Underground FROM DetailsGame";
+    private final HashMap<String,Integer> TabTraits = new LinkedHashMap<>();
+    private static final HashMap<String,String> traitsFromAPIToDatabase = new HashMap<>();
     public void insert(matchFromApi match)throws SQLException {
         insertDetailGame(match);
         insertChampGame(match);
@@ -89,6 +99,36 @@ public class matchDetailsDAO {
         }
     }
 
+    public ArrayList<gameComp> selectGameComps (Utils.regionUtils.region r) throws SQLException, IOException {
+        Connection cnx = null;
+        PreparedStatement rqt;
+        Properties prop = new Properties();
+        prop.load(new FileInputStream("traits.properties"));
+        ArrayList<gameComp> Comps= new ArrayList<>();
+        ResultSet rs;
+        try {
+            cnx = database.openCo();
+            rqt = cnx.prepareStatement(selectGamesWithTraits);
+            System.out.println("executing big select");
+            rs = rqt.executeQuery();
+            System.out.println("end of executing big select");
+            while (rs.next()) {
+                gameComp g = new gameComp(rs.getString("PUUID"),rs.getString("matchID"),rs.getInt("Classement"));
+                for (int i=0;i<(int)prop.get("nbTraits");i++) {
+                    g.addToTraits((String)prop.get("trait"+i),rs.getInt((String)prop.get("trait"+i)));
+                }
+                Comps.add(g);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        finally {
+            if (cnx != null && !cnx.isClosed()) {
+                cnx.close();
+            }
+        }
+        return Comps;
+    }
     private void generateTabTrait(traitFromApi[] traits) {
         for(int k=0; k<traits.length; k++) {
             // must insert null if not 3 augments taken
@@ -96,66 +136,24 @@ public class matchDetailsDAO {
         }
     }
     private void clearTabTrait() {
-        for (String key : TabTraits.keySet()) {
-            TabTraits.put(key,0);
+        TabTraits.replaceAll((key,old) -> 0);
+    }
+    public matchDetailsDAO() throws IOException {
+        Properties prop = new Properties();
+        prop.load(new FileInputStream("traits.properties"));
+        for (int i=0;i<(int)prop.get("nbTraits");i++) {
+            TabTraits.put((String)prop.get("trait"+i),0);
         }
     }
-    public matchDetailsDAO() {
-        TabTraits.put("Ace",0);
-        TabTraits.put("Admin",0);
-        TabTraits.put("Aegis",0);
-        TabTraits.put("AnimaSquad",0);
-        TabTraits.put("Arsenal",0);
-        TabTraits.put("Brawler",0);
-        TabTraits.put("Civilian",0);
-        TabTraits.put("Corrupted",0);
-        TabTraits.put("Defender",0);
-        TabTraits.put("Duelist",0);
-        TabTraits.put("Forecaster",0);
-        TabTraits.put("Gadgeteen",0);
-        TabTraits.put("Hacker",0);
-        TabTraits.put("Heart",0);
-        TabTraits.put("LaserCorps",0);
-        TabTraits.put("Mascot",0);
-        TabTraits.put("MechPrime",0);
-        TabTraits.put("OxForce",0);
-        TabTraits.put("Prankster",0);
-        TabTraits.put("Recon",0);
-        TabTraits.put("Renegade",0);
-        TabTraits.put("SpellSlinger",0);
-        TabTraits.put("StarGuardian",0);
-        TabTraits.put("Supers",0);
-        TabTraits.put("Sureshot",0);
-        TabTraits.put("Threat",0);
-        TabTraits.put("Underground",0);
-    }
     static {
-        traitsFromAPIToDatabase.put("Set8_Ace","Ace");
-        traitsFromAPIToDatabase.put("Set8_Admin","Admin");
-        traitsFromAPIToDatabase.put("Set8_Aegis","Aegis");
-        traitsFromAPIToDatabase.put("Set8_AnimaSquad","AnimaSquad");
-        traitsFromAPIToDatabase.put("Set8_Arsenal","Arsenal");
-        traitsFromAPIToDatabase.put("Set8_Brawler","Brawler");
-        traitsFromAPIToDatabase.put("Set8_Civilian","Civilian");
-        traitsFromAPIToDatabase.put("Set8_Corrupted","Corrupted");
-        traitsFromAPIToDatabase.put("Set8_Defender","Defender");
-        traitsFromAPIToDatabase.put("Set8_Duelist","Duelist");
-        traitsFromAPIToDatabase.put("Set8_Forecaster","Forecaster");
-        traitsFromAPIToDatabase.put("Set8_GenAE","Gadgeteen");
-        traitsFromAPIToDatabase.put("Set8_Hacker","Hacker");
-        traitsFromAPIToDatabase.put("Set8_Heart","Heart");
-        traitsFromAPIToDatabase.put("Set8_SpaceCorps","LaserCorps");
-        traitsFromAPIToDatabase.put("Set8_Mascot","Mascot");
-        traitsFromAPIToDatabase.put("Set8_ExoPrime","MechPrime");
-        traitsFromAPIToDatabase.put("Set8_OxForce","OxForce");
-        traitsFromAPIToDatabase.put("Set8_Prankster","Prankster");
-        traitsFromAPIToDatabase.put("Set8_Recon","Recon");
-        traitsFromAPIToDatabase.put("Set8_Renegade","Renegade");
-        traitsFromAPIToDatabase.put("Set8_Channeler","SpellSlinger");
-        traitsFromAPIToDatabase.put("Set8_StarGuardian","StarGuardian");
-        traitsFromAPIToDatabase.put("Set8_Supers","Supers");
-        traitsFromAPIToDatabase.put("Set8_Deadeye","Sureshot");
-        traitsFromAPIToDatabase.put("Set8_Threat","Threat");
-        traitsFromAPIToDatabase.put("Set8_UndergroundThe","Underground");
+        Properties prop = new Properties();
+        try {
+            prop.load(new FileInputStream("traits.properties"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        for (int i=0;i<(int)prop.get("nbTraits");i++) {
+            traitsFromAPIToDatabase.put((String)prop.get("trait"+i),(String)prop.get("traitfromapi"+i));
+        }
     }
 }

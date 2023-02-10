@@ -16,16 +16,9 @@ HTML JS 						 une table joueurs: PUUID / Région                      		      g
 							 		   
 
 IMPROVE :
-clé API ds un fichier de config
-methode gson ds chaque fichier => faire une classe abstract avec la methode et les autres extends de celle la ou un util avec la fonction?
-La création du header qui revient ds chaque fichier => un util ou classe abstract
+
 meilleur gestion des exceptions
 Mettre les synergies ds un fichier de config et n'avoir qu'a update ce cfichier pour que tout s'update (synergies ds l'ordre alphabetique) , pareille avec les champions
 Cluster, que les pts soit les champions directement plutot que les synergies ? 
-Une table compos avec en ID le nom de la compo (avec les synergies)
-Une table Variation avec pour la mm compo ttes les variations.
+
 Un algo qui repasse ds tout les matchDétails et les range dans les comops (en rajoutant une colonne nomCompo)
-
-ELECT DetailsGame.MatchID, DetailsGame.PUUID, Classement,Trait1,COUNT(Trait1),Trait2,COUNT(Trait2),Trait3,COUNT(Trait3) FROM DetailsGame JOIN ChampGame ON DetailsGame.MatchID = ChampGame.MatchID AND DetailsGame.PUUID= ChampGame.PUUID JOIN Champion ON ChampGame.NomAPI = Champion.NomAPI GROUP BY MatchID,PUUID,Trait1;
-
-OxForce Mascot Aegis SpellSlinger Arsenal Sureshot LaserCorps Recon Threat Admin Renegade Brawler Ace MechPrime StarGuardian Prankster Underground Corrupted Duelist Civilian Supers Forecaster AnimaSquad Gadgeteen Heart Defender Hacker

@@ -6,20 +6,13 @@ import com.gargoylesoftware.htmlunit.*;
 import com.google.gson.*;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class getTop{
+public class getTop extends apiRequester{
 
-    private boolean jsonSerializeNulls = true;
-
-    public int cptrequest;
-    
-    final static String apiKey ="RGAPI-d19ed59e-5d63-41e7-9a2c-4240f8617c6c";
 
     final static String challengersEUW = "https://euw1.api.riotgames.com/tft/league/v1/challenger";
     final static String challengersNA = "https://na1.api.riotgames.com/tft/league/v1/challenger";
@@ -36,13 +29,8 @@ public class getTop{
 
     final static Map<String, String> headerAPI = new HashMap<>();
 
-    public getTop(){
-        headerAPI.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36");
-        headerAPI.put("Accept-Language","fr-FR,fr;q=0.6");
-        headerAPI.put("Accept-Charset","application/x-www-form-urlencoded; charset=UTF-8");
-        headerAPI.put("Origin","https://developer.riotgames.com");
-        headerAPI.put("X-Riot-Token",apiKey);
-        cptrequest = 1;
+    public getTop() throws IOException {
+        super();
     }
 
     public void getChallengers(regionUtils.region r) throws IOException {
@@ -153,33 +141,4 @@ public class getTop{
     public void clearTable(){
         //TODO => vide la table joueurs
     }
-
-    protected Gson gson(){
-
-        // serialiazeNulls is required otherwise null values
-        // are ommited from maps serialization, which will cause
-        // some requests to fail
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        if (jsonSerializeNulls) {
-            gsonBuilder.serializeNulls();
-        }
-
-        // Avoid the scientific representation of Doubles.
-        // This is coupled with filterResult
-        gsonBuilder.registerTypeAdapter(Double.class, new JsonSerializer<Double>() {
-            @Override
-            public JsonElement serialize(final Double src, final Type typeOfSrc, final JsonSerializationContext context) {
-                BigDecimal value = BigDecimal.valueOf(src);
-
-                return new JsonPrimitive(value);
-            }
-        });
-
-        return gsonBuilder.create();
-    }
-
-    public void setJsonSerializeNulls(boolean jsonSerializeNulls) {
-        this.jsonSerializeNulls = jsonSerializeNulls;
-    }
-
 }
