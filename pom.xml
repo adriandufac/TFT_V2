@@ -41,7 +41,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>BO.getTop</mainClass>
+                    <mainClass>Scripts.getTop</mainClass>
 <!--                    <arguments>
                         <argument>argument1</argument>
                     </arguments>-->
@@ -84,7 +84,7 @@
                             <addClasspath>true</addClasspath>
                             <!-- here we specify that we want to use the main method within the App class -->
                             <!-- Voir si on peut lancer differents mains en fnct d'arguments ?-->
-                            <mainClass>Scripts</mainClass>
+                            <mainClass>mainScript</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -1,6 +1,8 @@
-import BO.*;
-import BO.CompAnalyses;
+import Scripts.CompAnalyses;
 import DAL.leagueDAO;
+import Scripts.getMatchesDetailsFromRegion;
+import Scripts.getMatchesFromRegion;
+import Scripts.getTop;
 import Utils.regionUtils;
 
 import java.io.IOException;
@@ -8,7 +10,7 @@ import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.util.List;
 
-public class Scripts {
+public class mainScript {
     public static void main(String[] args) throws IOException {
 
         if ( "getTop".equals(args[0])) {

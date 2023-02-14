@@ -1,5 +1,6 @@
-package BO;
+package Scripts;
 
+import BO.match;
 import DAL.matchesDAO;
 import Utils.regionUtils;
 import com.gargoylesoftware.htmlunit.HttpMethod;
@@ -15,18 +16,29 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * This class is used to perform requests to Riot API to retrieve MatchID of games played by the best players from
+ * different regions. The matchId are then inserted to the MatchsIDcurrent.
+ *
+ */
 public class getMatchesFromRegion extends apiRequester {
 
-    private final ArrayList<match> matchesAll = new ArrayList<>();
+    private final ArrayList<match> allMatchesFromCurrentPlayer = new ArrayList<>();
 
     final static String baseURL = "api.riotgames.com/tft/match/v1/matches/by-puuid/";
-
 
     public getMatchesFromRegion() throws IOException {
         super();
     }
+
+    /**
+     *Retrive matchIDs of nbMatchsPerPlayer last match played by players in PUUIDS list from Region r and insert them into MatchsIDcurrent
+     * @param r
+     * @param nbMatchsPerPlayer
+     * @param PUUIDS
+     * @throws MalformedURLException
+     */
     public void getMatchs(regionUtils.region r, int nbMatchsPerPlayer, List<String> PUUIDS) throws MalformedURLException {
 
         String URL = regionUtils.getURLfromRegion(r,baseURL);
@@ -37,12 +49,7 @@ public class getMatchesFromRegion extends apiRequester {
             for (String PUUID : PUUIDS){
                 URL2 = URL + PUUID + "/ids?start=0&count=" + nbMatchsPerPlayer;
                 webRequest =  new WebRequest(new URL(URL2), HttpMethod.GET );
-                for(Map.Entry<String, String> entry : headerAPI.entrySet() ){
-                    String name = entry.getKey();
-                    String value = entry.getValue();
-                    // params.add(new NameValuePair(name, value));
-                    webRequest.setAdditionalHeader(name, value);
-                }
+                setHeader(webRequest);
 
                 Page page = webClient.getPage(webRequest);
                 System.out.println(webRequest);
@@ -54,15 +61,14 @@ public class getMatchesFromRegion extends apiRequester {
                 for (String match:list) {
                     match m = new match(match,r);
                     System.out.println(m.r.toString());
-                    matchesAll.add(m);
+                    allMatchesFromCurrentPlayer.add(m);
                 }
                 matchesDAO matchesDAO = new matchesDAO();
-                matchesDAO.insert(matchesAll);
-                matchesAll.clear();
+                matchesDAO.insert(allMatchesFromCurrentPlayer);
+                allMatchesFromCurrentPlayer.clear();
                 cptrequest++;
                 if (cptrequest%100 == 0){
-                    System.out.println(" PAUSE 2 MIN");
-                    Thread.sleep(120000);
+                    Utils.pause.pause(2);
                 }
             }
         } catch (Exception e) {

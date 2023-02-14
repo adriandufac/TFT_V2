@@ -1,17 +1,22 @@
-package BO;
+package Scripts;
 
 import ApiObjects.playerFromApi;
+import BO.leagueClass;
+import DAL.leagueDAO;
 import Utils.regionUtils;
 import com.gargoylesoftware.htmlunit.*;
 import com.google.gson.*;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.sql.SQLException;
 
-public class getTop extends apiRequester{
+
+/**
+ * This class is used to perform requests to Riot API to retrive PUUIDs of the best players across the diferents regions
+ * The PUUID are then inserted into the "Joueurs" table
+ */
+public class getTop extends apiRequester {
 
 
     final static String challengersEUW = "https://euw1.api.riotgames.com/tft/league/v1/challenger";
@@ -27,12 +32,15 @@ public class getTop extends apiRequester{
 
 
 
-    final static Map<String, String> headerAPI = new HashMap<>();
-
     public getTop() throws IOException {
         super();
     }
 
+    /**
+     * Retrieves PUUID of challengers players from the selected Region and insert into "Joueurs" table
+     * @param r
+     * @throws IOException
+     */
     public void getChallengers(regionUtils.region r) throws IOException {
 
     try (WebClient webClient = new WebClient()) {
@@ -56,15 +64,8 @@ public class getTop extends apiRequester{
         }
         
         Gson gson = gson();
-        for(Entry<String, String> entry : headerAPI.entrySet() ){
-            String name = entry.getKey();
-            String value = entry.getValue();
-            // params.add(new NameValuePair(name, value));
-            webRequest.setAdditionalHeader(name, value);
-        }
-        //webRequest.setRequestParameters(params);
-        
-        
+        setHeader(webRequest);
+
         Page page = webClient.getPage(webRequest);
         String jsonResponse;
 
@@ -73,7 +74,7 @@ public class getTop extends apiRequester{
         leagueClass challs = gson.fromJson(jsonResponse, leagueClass.class);
         System.out.println("****************************\n");
         System.out.println(challs.entries.get(challs.entries.size()-1).summonerName);
-        for (player player : challs.entries){
+        for (BO.player player : challs.entries){
             
             switch (r){
                 case EUW:
@@ -86,17 +87,13 @@ public class getTop extends apiRequester{
 
                 case KR:
                     webRequest2 = new WebRequest(new URL(sumInfoByNameKR+player.getName()), HttpMethod.GET );
+                    break;
 
                     default:
                     webRequest2 = new WebRequest(new URL(sumInfoByNameEUW+player.getName()), HttpMethod.GET );
                     break;
             }
-            for(Entry<String, String> entry : headerAPI.entrySet() ){
-                String name = entry.getKey();
-                String value = entry.getValue();
-                // params.add(new NameValuePair(name, value));
-                webRequest2.setAdditionalHeader(name, value);
-            }
+            setHeader(webRequest2);
                 
                 try{
                     Page page2 = webClient.getPage(webRequest2);
@@ -115,27 +112,22 @@ public class getTop extends apiRequester{
                     System.out.println(player.region);
                     cptrequest++;
                     if (cptrequest%100 == 0){
-                        System.out.println(" PAUSE 2 MIN");
-                        Thread.sleep(120000);
+                        Utils.pause.pause(2);
                     }
-
                 }
                 catch(FailingHttpStatusCodeException e){
                     System.out.println("BUG");
-                    
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
         }
-        /*leagueDAO leagueDAO = new leagueDAO();
-        leagueDAO.insert(challs);*/
-        System.out.println("\n yooooooooooooooooooo n");
+        leagueDAO leagueDAO = new leagueDAO();
+        leagueDAO.insert(challs);
         } catch (IOException e) {
             System.out.println("BUG");
+        } catch (SQLException e) {
+        throw new RuntimeException(e);
         }
-
-
-
     }
 
     public void clearTable(){

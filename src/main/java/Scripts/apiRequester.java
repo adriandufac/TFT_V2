@@ -1,5 +1,6 @@
-package BO;
+package Scripts;
 
+import com.gargoylesoftware.htmlunit.WebRequest;
 import com.google.gson.*;
 
 import java.io.FileInputStream;
@@ -24,6 +25,14 @@ public abstract class apiRequester {
         headerAPI.put("Origin","https://developer.riotgames.com");
         headerAPI.put("X-Riot-Token",prop.getProperty("key"));
         cptrequest = 1;
+    }
+
+    public void setHeader (WebRequest request) {
+        for(Map.Entry<String, String> entry : headerAPI.entrySet() ){
+            String name = entry.getKey();
+            String value = entry.getValue();
+            request.setAdditionalHeader(name, value);
+        }
     }
 
     protected Gson gson(){

@@ -2,7 +2,7 @@ package BO;
 public class player {
 
     String summonerId;
-    String summonerName;
+    public String summonerName;
     public String PUUID;
     public String region;
 

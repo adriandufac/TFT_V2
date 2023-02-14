@@ -13,7 +13,7 @@ import java.util.Map;
 public class compositionDAO {
     static final String insertComposition = "INSERT INTO Composition values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    public void insertCompositionFromClusters(List<Cluster<DoublePoint>> clusters) throws SQLException {
+    public void insertCompositionFromClusters(List<Cluster<DoublePoint>> clusters ,boolean first) throws SQLException {
         Connection cnx = null;
         PreparedStatement rqt;
         try {
@@ -23,7 +23,11 @@ public class compositionDAO {
             for (Cluster<DoublePoint> c : clusters) {
                 rqt = cnx.prepareStatement(insertComposition);
                 for (DoublePoint point : c.getPoints()) {
-                    rqt.setString(1, COMPO_MAP.get(j)+k);
+                    if (first) {
+                        rqt.setString(1, "COMPO"+j+k);
+                    } else {
+                        rqt.setString(1, COMPO_MAP.get(j)+k);
+                    }
                     for (int i = 0; i < point.getPoint().length; i++) {
                         rqt.setInt(i+2, (int)(point.getPoint()[i]));
                     }
