@@ -1,18 +1,21 @@
 package DAL;
 
+import Scripts.apiRequester;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.*;
+import java.util.*;
 
 public class compositionDAO {
     static final String insertComposition = "INSERT INTO Composition values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+    static final String selectComposition = "SELECT Nom,Ace,Admin,AnimaSquad,Arsenal,Brawler,Civilian,Corrupted,Defender,Duelist,Forecaster," +
+            "Gadgeteen,Hacker,Heart,LaserCorps,Mascot,MechPrime,OxForce,Prankster,Recon,Renegade,SpellSlinger,StarGuardian," +
+            "Supers,Sureshot,Threat,Underground FROM Composition";
     public void insertCompositionFromClusters(List<Cluster<DoublePoint>> clusters ,boolean first) throws SQLException {
         Connection cnx = null;
         PreparedStatement rqt;
@@ -47,7 +50,39 @@ public class compositionDAO {
             cnx.close();
         }
     }
-    static final private Map<Integer, String> COMPO_MAP = new HashMap<>();
+    public  ArrayList<String[]> selectCompositions() throws IOException, SQLException {
+        Connection cnx = null;
+        PreparedStatement rqt;
+        Properties prop = new Properties();
+        InputStream input = apiRequester.class.getResourceAsStream("/apikey.properties");
+        System.out.println("input: " + input);
+        prop.load(input);
+        ArrayList<String[]> Comps= new ArrayList<>();
+        ResultSet rs;
+        try {
+            cnx = database.openCo();
+            rqt = cnx.prepareStatement(selectComposition);
+            rs = rqt.executeQuery();
+            while (rs.next()) {
+                String comp[] = new String[(int)prop.get("nbTraits")+1];
+                comp[0] = rs.getString("Nom");
+                for (int i=1;i<(int)prop.get("nbTraits");i++) {
+                    comp[i] = String.valueOf(rs.getInt((String)prop.get("Traits"+(i-1))));
+                }
+                Comps.add(comp);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        finally {
+            if (cnx != null && !cnx.isClosed()) {
+                cnx.close();
+            }
+        }
+        return Comps;
+    }
+
+    static final public Map<Integer, String> COMPO_MAP = new HashMap<>();
     static {
         COMPO_MAP.put(0,"recons Threat");
         COMPO_MAP.put(1,"8 brawlers");

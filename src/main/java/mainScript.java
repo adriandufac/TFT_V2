@@ -1,8 +1,5 @@
-import Scripts.CompAnalyses;
+import Scripts.*;
 import DAL.leagueDAO;
-import Scripts.getMatchesDetailsFromRegion;
-import Scripts.getMatchesFromRegion;
-import Scripts.getTop;
 import Utils.regionUtils;
 
 import java.io.IOException;
@@ -50,5 +47,14 @@ public class mainScript {
                 throw new RuntimeException(e);
             }
         }
+        if ( "getCompsStats".equals(args[0])) {
+            getCompStats test4 = new getCompStats();
+            try {
+                test4.getCompStats(regionUtils.region.NA);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 }

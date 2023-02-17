@@ -1,7 +1,7 @@
 
 
 FRONT                 |      BACK         |       BDD                                            		   | SCRIPTS API +  INSERT EN BDD + fichier config (API key)
-HTML JS 						 une table joueurs: PUUID / Région                      		      get top 500 joueurs/Régions + INSERT en base
+HTML JS VUejS						 une table joueurs: PUUID / Région                      		      get top 500 joueurs/Régions + INSERT en base
 							 une table GamesCurrent: matchIDS current patch          		      get X GAMES DES meilleurs JOUEURS de chaque région + insert en base avec check de si ca existe déja
 							 une table GamesPrevious: matchIDs previous patch	                  Script qui extrait les ID de la table ID, pour chaque ID vérifie si elle est dans la table details sinon call get matchdetails + INSERTION des details en base 
 							 une table detailsGame:                                                 Script de pattern recognisation avec les data des games qui reconnait les compo et fait des stats puis les insert en BDD
@@ -18,7 +18,7 @@ HTML JS 						 une table joueurs: PUUID / Région                      		      g
 IMPROVE :
 
 meilleur gestion des exceptions
-Mettre les synergies ds un fichier de config et n'avoir qu'a update ce cfichier pour que tout s'update (synergies ds l'ordre alphabetique) , pareille avec les champions
+requetes ou il y a les synergies avec string builder et fct du .properties
 Cluster, que les pts soit les champions directement plutot que les synergies ? 
 
 Un algo qui repasse ds tout les matchDétails et les range dans les comops (en rajoutant une colonne nomCompo)

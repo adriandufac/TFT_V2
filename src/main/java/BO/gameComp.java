@@ -1,7 +1,10 @@
 package BO;
 
+import Scripts.apiRequester;
+
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -15,7 +18,9 @@ public class gameComp  {
 
     public gameComp(String puuid,String matchID, int classement) throws IOException {
         Properties prop = new Properties();
-        prop.load(new FileInputStream("traits.properties"));
+        InputStream input = gameComp.class.getResourceAsStream("/traits.properties");
+        System.out.println("input: " + input);
+        prop.load(input);
         this.PUUID = puuid;
         this.MatchID = matchID;
         this.Classement = classement;

@@ -3,9 +3,11 @@ package DAL;
 import ApiObjects.matchFromApi;
 import ApiObjects.traitFromApi;
 import BO.gameComp;
+import Scripts.apiRequester;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -103,7 +105,8 @@ public class matchDetailsDAO {
         Connection cnx = null;
         PreparedStatement rqt;
         Properties prop = new Properties();
-        prop.load(new FileInputStream("traits.properties"));
+        InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
+        prop.load(input);
         ArrayList<gameComp> Comps= new ArrayList<>();
         ResultSet rs;
         try {
@@ -140,19 +143,24 @@ public class matchDetailsDAO {
     }
     public matchDetailsDAO() throws IOException {
         Properties prop = new Properties();
-        prop.load(new FileInputStream("traits.properties"));
-        for (int i=0;i<(int)prop.get("nbTraits");i++) {
+        InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
+        System.out.println("input: " + input);
+        prop.load(input);
+        for (int i=0;i<Integer.parseInt((String) prop.get("nbTraits"));i++) {
             TabTraits.put((String)prop.get("trait"+i),0);
         }
     }
     static {
         Properties prop = new Properties();
+
         try {
-            prop.load(new FileInputStream("traits.properties"));
+            InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
+            System.out.println("input: " + input);
+            prop.load(input);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        for (int i=0;i<(int)prop.get("nbTraits");i++) {
+        for (int i = 0; i<Integer.parseInt((String) prop.get("nbTraits")); i++) {
             traitsFromAPIToDatabase.put((String)prop.get("trait"+i),(String)prop.get("traitfromapi"+i));
         }
     }

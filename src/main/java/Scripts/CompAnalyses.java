@@ -10,6 +10,7 @@ import org.apache.commons.math3.ml.clustering.DoublePoint;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -20,13 +21,11 @@ import java.util.*;
 public class CompAnalyses {
     private Properties prop;
     private  Map<Integer, String> TRAITS_MAPS = new HashMap<>();
-    public CompAnalyses() {
-        prop = new Properties();
-        try {
-            prop.load(new FileInputStream("traits.properties"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public CompAnalyses() throws IOException {
+        Properties prop = new Properties();
+        InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
+        System.out.println("input: " + input);
+        prop.load(input);
         for (int i=0;i<(int)prop.get("nbTraits");i++) {
             TRAITS_MAPS.put(i,(String)prop.get("trait"+i));
         }
