@@ -13,7 +13,7 @@ import java.util.*;
 public class compositionDAO {
     static final String insertComposition = "INSERT INTO Composition values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    static final String selectComposition = "SELECT Nom,Ace,Admin,AnimaSquad,Arsenal,Brawler,Civilian,Corrupted,Defender,Duelist,Forecaster," +
+    static final String selectComposition = "SELECT Nom,Ace,Admin,Aegis,AnimaSquad,Arsenal,Brawler,Civilian,Corrupted,Defender,Duelist,Forecaster," +
             "Gadgeteen,Hacker,Heart,LaserCorps,Mascot,MechPrime,OxForce,Prankster,Recon,Renegade,SpellSlinger,StarGuardian," +
             "Supers,Sureshot,Threat,Underground FROM Composition";
     public void insertCompositionFromClusters(List<Cluster<DoublePoint>> clusters ,boolean first) throws SQLException {
@@ -54,8 +54,9 @@ public class compositionDAO {
         Connection cnx = null;
         PreparedStatement rqt;
         Properties prop = new Properties();
-        InputStream input = apiRequester.class.getResourceAsStream("/apikey.properties");
-        System.out.println("input: " + input);
+        InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
+        System.out.println("Select compositin :" );
+        System.out.println("input : " + input);
         prop.load(input);
         ArrayList<String[]> Comps= new ArrayList<>();
         ResultSet rs;
@@ -63,16 +64,25 @@ public class compositionDAO {
             cnx = database.openCo();
             rqt = cnx.prepareStatement(selectComposition);
             rs = rqt.executeQuery();
+            System.out.println("query executed");
             while (rs.next()) {
-                String comp[] = new String[(int)prop.get("nbTraits")+1];
+                System.out.println("trying to get taille");
+                int taille = Integer.parseInt(prop.getProperty("nbTraits"));
+                System.out.println(taille);
+                String comp[] = new String[taille+1];
                 comp[0] = rs.getString("Nom");
-                for (int i=1;i<(int)prop.get("nbTraits");i++) {
-                    comp[i] = String.valueOf(rs.getInt((String)prop.get("Traits"+(i-1))));
+                for (int i=1;i<taille+1;i++) {
+                    System.out.println("****");
+                    String property = "trait" + (i-1);
+                    String trait = prop.getProperty(property);
+                    System.out.println(property + " : " + trait);
+                    comp[i] = String.valueOf(rs.getInt(trait));
                 }
                 Comps.add(comp);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("error in select composition + : " + e.getStackTrace());
+            System.exit(0);
         }
         finally {
             if (cnx != null && !cnx.isClosed()) {
@@ -91,7 +101,7 @@ public class compositionDAO {
         COMPO_MAP.put(4,"recons starguardian");
         COMPO_MAP.put(5,"4Ace mech");
         COMPO_MAP.put(6,"Surshot mech");
-        COMPO_MAP.put(7,"6 duelists");
+        COMPO_MAP.put(7,"6duelists");
         COMPO_MAP.put(8,"6laserCorps");
     }
 

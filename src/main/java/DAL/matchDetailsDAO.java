@@ -116,14 +116,20 @@ public class matchDetailsDAO {
             rs = rqt.executeQuery();
             System.out.println("end of executing big select");
             while (rs.next()) {
-                gameComp g = new gameComp(rs.getString("PUUID"),rs.getString("matchID"),rs.getInt("Classement"));
-                for (int i=0;i<(int)prop.get("nbTraits");i++) {
-                    g.addToTraits((String)prop.get("trait"+i),rs.getInt((String)prop.get("trait"+i)));
+                System.out.println("prout");
+                System.out.println(rs.getString("PUUID"));
+                System.out.println(rs.getString("MatchID"));
+                System.out.println(rs.getInt("Classement"));
+                gameComp g = new gameComp(rs.getString("PUUID"),rs.getString("MatchID"),rs.getInt("Classement"));
+                System.out.println("prout2");
+                for (int i=0;i<Integer.parseInt(prop.getProperty("nbTraits"));i++) {
+
+                    g.addToTraits(prop.getProperty("trait"+i),rs.getInt(prop.getProperty("trait"+i)));
                 }
                 Comps.add(g);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("error in selectgamecomps  : " + e.getMessage());
         }
         finally {
             if (cnx != null && !cnx.isClosed()) {
@@ -144,7 +150,6 @@ public class matchDetailsDAO {
     public matchDetailsDAO() throws IOException {
         Properties prop = new Properties();
         InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
-        System.out.println("input: " + input);
         prop.load(input);
         for (int i=0;i<Integer.parseInt((String) prop.get("nbTraits"));i++) {
             TabTraits.put((String)prop.get("trait"+i),0);
@@ -155,7 +160,7 @@ public class matchDetailsDAO {
 
         try {
             InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
-            System.out.println("input: " + input);
+            System.out.println("input matchdetails: " + input);
             prop.load(input);
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -19,13 +19,13 @@ public class gameComp  {
     public gameComp(String puuid,String matchID, int classement) throws IOException {
         Properties prop = new Properties();
         InputStream input = gameComp.class.getResourceAsStream("/traits.properties");
-        System.out.println("input: " + input);
+        System.out.println("input gamecomp: " + input);
         prop.load(input);
         this.PUUID = puuid;
         this.MatchID = matchID;
         this.Classement = classement;
-        for (int i=0;i<(int)prop.get("nbTraits");i++) {
-            Traits.put((String)prop.get("trait"+i),0);
+        for (int i=0;i<Integer.parseInt(prop.getProperty("nbTraits"));i++) {
+            Traits.put(prop.getProperty("trait"+i),0);
         }
     }
 

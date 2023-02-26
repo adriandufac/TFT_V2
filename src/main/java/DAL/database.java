@@ -13,7 +13,7 @@ public class database{
    static {
        try {
            InputStream input = apiRequester.class.getResourceAsStream("/DB.properties");
-           System.out.println("input: " + input);
+           System.out.println("input database: " + input);
            prop.load(input);
        } catch (IOException e) {
            throw new RuntimeException(e);

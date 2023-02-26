@@ -24,7 +24,7 @@ public class CompAnalyses {
     public CompAnalyses() throws IOException {
         Properties prop = new Properties();
         InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
-        System.out.println("input: " + input);
+        System.out.println("input comp analyse: " + input);
         prop.load(input);
         for (int i=0;i<(int)prop.get("nbTraits");i++) {
             TRAITS_MAPS.put(i,(String)prop.get("trait"+i));
