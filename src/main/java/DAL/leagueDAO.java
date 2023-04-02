@@ -1,8 +1,5 @@
 package DAL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +9,7 @@ public class leagueDAO {
 
     private static final String insertLeague = "insert into Joueurs (PUUID,Region) values (?,?)";
 	private static final String selectPUUIDFromRegion = "SELECT PUUID from Joueurs WHERE Region = ?";
+	private static final String clearTable = "DELETE FROM Joueurs";
 
     public void  insert(leagueClass league ) throws SQLException {
         Connection cnx= database.openCo();
@@ -19,9 +17,12 @@ public class leagueDAO {
 		try {
 			rqt = cnx.prepareStatement(insertLeague);
 			for (BO.player player : league.entries){
-				rqt.setString(1,player.PUUID);
-				rqt.setString(2, player.region);
-				rqt.executeUpdate();
+				if (player.PUUID != null && player.region != null) {
+					System.out.println(player.getName());
+					rqt.setString(1,player.PUUID);
+					rqt.setString(2, player.region);
+					rqt.executeUpdate();
+				}
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -32,9 +33,9 @@ public class leagueDAO {
 	}
 
 	public List<String> selectPUUIDSFromRegion (Utils.regionUtils.region r) throws SQLException {
-		Connection cnx = database.openCo();;
+		Connection cnx = database.openCo();
 		PreparedStatement rqt;
-		List<String> PUUIDS= new ArrayList<>();;
+		List<String> PUUIDS= new ArrayList<>();
 		ResultSet rs;
 		try {
 			rqt = cnx.prepareStatement(selectPUUIDFromRegion);
@@ -56,6 +57,13 @@ public class leagueDAO {
 			cnx.close();
 		}
 		return PUUIDS;
+	}
+
+	public void clearJoueurs() throws SQLException {
+		Connection cnx = database.openCo();
+		Statement rqt = cnx.createStatement();
+		rqt.executeUpdate(clearTable);
+		cnx.close();
 	}
     
 }

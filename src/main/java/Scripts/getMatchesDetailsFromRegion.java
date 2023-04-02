@@ -18,7 +18,7 @@ import java.util.List;
  * This class is used to perform requests to Riot API to retrieve all information of games in matchsIDCurrent table and
  * inserts those information in DetailsGame and ChampGame tables
  */
-public class getMatchesDetailsFromRegion extends apiRequester {
+public class getMatchesDetailsFromRegion extends riotApiRequester {
     final static String baseURL = "api.riotgames.com/tft/match/v1/matches/";
 
     public getMatchesDetailsFromRegion() throws IOException {
@@ -32,7 +32,7 @@ public class getMatchesDetailsFromRegion extends apiRequester {
      */
     public void getMatchDetails(regionUtils.region r) throws IOException {
         String URL = regionUtils.getURLfromRegion(r,baseURL);
-        Gson gson = gson();
+        Gson gson = Utils.jsonUtils.gson(jsonSerializeNulls);
         matchDetailsDAO matchDetailsDAO = new matchDetailsDAO();
         matchesDAO matchesDAO = new matchesDAO();
         List<String> matchesID = matchesDAO.selectmatchsIDSFromRegion(r);
@@ -44,12 +44,12 @@ public class getMatchesDetailsFromRegion extends apiRequester {
                 webRequest =  new WebRequest(new URL(URL2), HttpMethod.GET );
                 setHeader(webRequest);
                 Page page = webClient.getPage(webRequest);
-                System.out.println(webRequest);
+                //System.out.println(webRequest);
                 String jsonResponse;
                 jsonResponse = page.getWebResponse().getContentAsString();
-                System.out.println(jsonResponse);
+                //System.out.println(jsonResponse);
                 matchFromApi match = gson.fromJson(jsonResponse, matchFromApi.class);
-                System.out.println(match.info.participants[0].puuid);
+                //System.out.println(match.info.participants[0].puuid);
                 matchDetailsDAO.insert(match);
                 cptrequest++;
                 if (cptrequest%100 == 0){

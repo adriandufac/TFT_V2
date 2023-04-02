@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * This class is used to perform requests to Riot API to retrive PUUIDs of the best players across the diferents regions
  * The PUUID are then inserted into the "Joueurs" table
  */
-public class getTop extends apiRequester {
+public class getTop extends riotApiRequester {
 
 
     final static String challengersEUW = "https://euw1.api.riotgames.com/tft/league/v1/challenger";
@@ -63,14 +63,14 @@ public class getTop extends apiRequester {
                 break;
         }
         
-        Gson gson = gson();
+        Gson gson = Utils.jsonUtils.gson(jsonSerializeNulls);
         setHeader(webRequest);
-
         Page page = webClient.getPage(webRequest);
         String jsonResponse;
 
         jsonResponse = page.getWebResponse().getContentAsString();
         System.out.println(jsonResponse);
+        cptrequest++;
         leagueClass challs = gson.fromJson(jsonResponse, leagueClass.class);
         System.out.println("****************************\n");
         System.out.println(challs.entries.get(challs.entries.size()-1).summonerName);
@@ -96,6 +96,7 @@ public class getTop extends apiRequester {
             setHeader(webRequest2);
                 
                 try{
+
                     Page page2 = webClient.getPage(webRequest2);
                     String jsonResponse2;
 
@@ -110,27 +111,25 @@ public class getTop extends apiRequester {
                     System.out.println(player.getName());
                     System.out.println(player.PUUID);
                     System.out.println(player.region);
-                    cptrequest++;
-                    if (cptrequest%100 == 0){
-                        Utils.pause.pause(2);
+
+                }
+                catch (FailingHttpStatusCodeException e) {
+                    if (e.getMessage().contains("404")) {
+                        System.out.println("Summoner not found (rename) ? ");
+                        cptrequest ++;
                     }
                 }
-                catch(FailingHttpStatusCodeException e){
-                    System.out.println("BUG");
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+            cptrequest++;
+            if (cptrequest%100 == 0){
+                Utils.pause.pause(2);
+            }
         }
         leagueDAO leagueDAO = new leagueDAO();
         leagueDAO.insert(challs);
         } catch (IOException e) {
             System.out.println("BUG");
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
         throw new RuntimeException(e);
         }
-    }
-
-    public void clearTable(){
-        //TODO => vide la table joueurs
     }
 }

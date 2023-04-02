@@ -1,5 +1,5 @@
+import DAL.*;
 import Scripts.*;
-import DAL.leagueDAO;
 import Utils.regionUtils;
 
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class mainScript {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         if ( "getTop".equals(args[0])) {
             getTop test = new getTop();
@@ -42,7 +42,7 @@ public class mainScript {
         if ( "getComps".equals(args[0])) {
             CompAnalyses test4 = new CompAnalyses();
             try {
-                test4.cluster(regionUtils.region.NA);
+                test4.clusterWithTreshHold(regionUtils.region.NA);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -51,6 +51,22 @@ public class mainScript {
             getCompStats test4 = new getCompStats();
             try {
                 test4.getCompStats(regionUtils.region.NA);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if ( "clearTables".equals(args[0])) {
+            leagueDAO leagueDAO = new leagueDAO();
+            matchesDAO matchesDAO = new matchesDAO();
+            matchDetailsDAO matchDetailsDAO = new matchDetailsDAO();
+            compositionDAO compositionDAO = new compositionDAO();
+            compStatsDAO compStatsDAO = new compStatsDAO();
+            try {
+                leagueDAO.clearJoueurs();
+                matchesDAO.clearMatchs();
+                matchDetailsDAO.clearMatchsDetails();
+                compositionDAO.clearComposition();
+                compStatsDAO.clearCompoStats();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

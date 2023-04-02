@@ -1,24 +1,20 @@
 package Scripts;
 
 import com.gargoylesoftware.htmlunit.WebRequest;
-import com.google.gson.*;
 
 import java.io.*;
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public abstract class apiRequester {
+public abstract class riotApiRequester {
     protected boolean jsonSerializeNulls = true;
     protected int cptrequest;
     static final Map<String, String> headerAPI = new HashMap();
 
-    public apiRequester() throws IOException {
+    public riotApiRequester() throws IOException {
         Properties prop = new Properties();
-        InputStream input = apiRequester.class.getResourceAsStream("/apikey.properties");
+        InputStream input = riotApiRequester.class.getResourceAsStream("/apikey.properties");
         System.out.println("input api requester: " + input);
         prop.load(input);
         headerAPI.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36");
@@ -37,27 +33,4 @@ public abstract class apiRequester {
         }
     }
 
-    protected Gson gson(){
-
-        // serialiazeNulls is required otherwise null values
-        // are ommited from maps serialization, which will cause
-        // some requests to fail
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        if (jsonSerializeNulls) {
-            gsonBuilder.serializeNulls();
-        }
-
-        // Avoid the scientific representation of Doubles.
-        // This is coupled with filterResult
-        gsonBuilder.registerTypeAdapter(Double.class, new JsonSerializer<Double>() {
-            @Override
-            public JsonElement serialize(final Double src, final Type typeOfSrc, final JsonSerializationContext context) {
-                BigDecimal value = BigDecimal.valueOf(src);
-
-                return new JsonPrimitive(value);
-            }
-        });
-
-        return gsonBuilder.create();
-    }
 }

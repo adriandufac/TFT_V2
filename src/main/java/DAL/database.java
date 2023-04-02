@@ -1,5 +1,5 @@
 package DAL;
-import Scripts.apiRequester;
+import Scripts.riotApiRequester;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,7 +12,7 @@ public class database{
    private static final Properties prop = new Properties();
    static {
        try {
-           InputStream input = apiRequester.class.getResourceAsStream("/DB.properties");
+           InputStream input = riotApiRequester.class.getResourceAsStream("/DB.properties");
            System.out.println("input database: " + input);
            prop.load(input);
        } catch (IOException e) {

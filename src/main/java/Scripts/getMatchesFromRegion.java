@@ -22,7 +22,7 @@ import java.util.List;
  * different regions. The matchId are then inserted to the MatchsIDcurrent.
  *
  */
-public class getMatchesFromRegion extends apiRequester {
+public class getMatchesFromRegion extends riotApiRequester {
 
     private final ArrayList<match> allMatchesFromCurrentPlayer = new ArrayList<>();
 
@@ -42,7 +42,7 @@ public class getMatchesFromRegion extends apiRequester {
     public void getMatchs(regionUtils.region r, int nbMatchsPerPlayer, List<String> PUUIDS) throws MalformedURLException {
 
         String URL = regionUtils.getURLfromRegion(r,baseURL);
-        Gson gson = gson();
+        Gson gson = Utils.jsonUtils.gson(jsonSerializeNulls);
         try (WebClient webClient = new WebClient()) {
             WebRequest webRequest;
             String URL2;
@@ -60,7 +60,6 @@ public class getMatchesFromRegion extends apiRequester {
                 ArrayList<String> list = gson.fromJson(jsonResponse, listType);
                 for (String match:list) {
                     match m = new match(match,r);
-                    System.out.println(m.r.toString());
                     allMatchesFromCurrentPlayer.add(m);
                 }
                 matchesDAO matchesDAO = new matchesDAO();

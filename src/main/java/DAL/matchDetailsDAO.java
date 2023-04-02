@@ -3,15 +3,11 @@ package DAL;
 import ApiObjects.matchFromApi;
 import ApiObjects.traitFromApi;
 import BO.gameComp;
-import Scripts.apiRequester;
+import Scripts.riotApiRequester;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -25,9 +21,12 @@ public class matchDetailsDAO {
     private static final String insertMatchDetailsToChampGame = "insert into ChampGame(MatchID,PUUID,NomAPI,tier,Item1,Item2,Item3)" +
                                                                 "values(?,?,?,?,?,?,?)";
 
-    private static final String selectGamesWithTraits = "SELECT MatchID,PUUID,Classement,Ace,Admin,Aegis,AnimaSquad,Arsenal,Brawler,Civilian,Corrupted," +
+/*    private static final String selectGamesWithTraits = "SELECT MatchID,PUUID,Classement,Ace,Admin,Aegis,AnimaSquad,Arsenal,Brawler,Civilian,Corrupted," +
             "Defender,Duelist,Forecaster,Gadgeteen,Hacker,Heart,LaserCorps,Mascot,MechPrime,OxForce,Prankster,Recon,Renegade,SpellSlinger" +
-            ",StarGuardian,Supers,Sureshot,Threat,Underground FROM DetailsGame";
+            ",StarGuardian,Supers,Sureshot,Threat,Underground FROM DetailsGame";*/
+    private static final String clearMatchsChampGame = "DELETE FROM ChampGame";
+    private static final String clearDetailsGame= "DELETE FROM DetailsGame";
+
     private final HashMap<String,Integer> TabTraits = new LinkedHashMap<>();
     private static final HashMap<String,String> traitsFromAPIToDatabase = new HashMap<>();
     public void insert(matchFromApi match)throws SQLException {
@@ -38,7 +37,7 @@ public class matchDetailsDAO {
         Connection cnx = database.openCo();
         PreparedStatement rqt;
         try {
-            rqt = cnx.prepareStatement(insertMatchDetailsToDetailsGame);
+            rqt = cnx.prepareStatement(buildinsertMatchDetailsToDetailsGame());
             for(int i =0; i<match.info.participants.length ; i++) {
                 rqt.setString(1,match.metadata.match_id);
 
@@ -53,12 +52,14 @@ public class matchDetailsDAO {
                     else {
                         rqt.setString(4 + j, null);
                     }
-                    generateTabTrait(match.info.participants[i].traits);
-                    int x = 7;
-                    for (String key : TabTraits.keySet()) {
-                        rqt.setInt(x,TabTraits.get(key));
-                        x++;
-                    }
+                }
+                generateTabTrait(match.info.participants[i].traits);
+                int x = 7;
+                for (String key : TabTraits.keySet()) {
+                    rqt.setInt(x,TabTraits.get(key));
+                    /*System.out.println("TRAIT N" + (x-6) + "   :");
+                    System.out.println(TabTraits.get(key));*/
+                    x++;
                 }
                 rqt.executeUpdate();
                 clearTabTrait();
@@ -105,27 +106,24 @@ public class matchDetailsDAO {
         Connection cnx = null;
         PreparedStatement rqt;
         Properties prop = new Properties();
-        InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
+        InputStream input = riotApiRequester.class.getResourceAsStream("/traits.properties");
         prop.load(input);
         ArrayList<gameComp> Comps= new ArrayList<>();
         ResultSet rs;
         try {
             cnx = database.openCo();
-            rqt = cnx.prepareStatement(selectGamesWithTraits);
-            System.out.println("executing big select");
+            rqt = cnx.prepareStatement(buildSelectString());
             rs = rqt.executeQuery();
-            System.out.println("end of executing big select");
             while (rs.next()) {
-                System.out.println("prout");
-                System.out.println(rs.getString("PUUID"));
-                System.out.println(rs.getString("MatchID"));
-                System.out.println(rs.getInt("Classement"));
                 gameComp g = new gameComp(rs.getString("PUUID"),rs.getString("MatchID"),rs.getInt("Classement"));
-                System.out.println("prout2");
                 for (int i=0;i<Integer.parseInt(prop.getProperty("nbTraits"));i++) {
 
                     g.addToTraits(prop.getProperty("trait"+i),rs.getInt(prop.getProperty("trait"+i)));
                 }
+                /*for (String key : g.Traits.keySet()) {
+                    System.out.println(key + " : " + g.Traits.get(key));
+                }*/
+                g.changeTraitValueWithTreeshhold();
                 Comps.add(g);
             }
         } catch (Exception e) {
@@ -138,10 +136,110 @@ public class matchDetailsDAO {
         }
         return Comps;
     }
+    public gameComp selectGameCompFromMAtchID (Utils.regionUtils.region r, String matchID) throws SQLException, IOException {
+        Connection cnx = null;
+        PreparedStatement rqt;
+        Properties prop = new Properties();
+        InputStream input = riotApiRequester.class.getResourceAsStream("/traits.properties");
+        prop.load(input);
+        ResultSet rs;
+        gameComp g = null;
+        try {
+            cnx = database.openCo();
+            rqt = cnx.prepareStatement(buildSelectString(matchID));
+            rs = rqt.executeQuery();
+            while (rs.next()) {
+                g = new gameComp(rs.getString("PUUID"),rs.getString("MatchID"),rs.getInt("Classement"));
+                for (int i=0;i<Integer.parseInt(prop.getProperty("nbTraits"));i++) {
+
+                    g.addToTraits(prop.getProperty("trait"+i),rs.getInt(prop.getProperty("trait"+i)));
+                }
+                /*for (String key : g.Traits.keySet()) {
+                    System.out.println(key + " : " + g.Traits.get(key));
+                }*/
+            }
+        } catch (Exception e) {
+            System.out.println("error in selectgamecomps  : " + e.getMessage());
+        }
+        finally {
+            if (cnx != null && !cnx.isClosed()) {
+                cnx.close();
+            }
+        }
+        g.changeTraitValueWithTreeshhold();
+        return g;
+    }
+    private String buildSelectString() throws IOException {
+        Properties prop = new Properties();
+        InputStream input = riotApiRequester.class.getResourceAsStream("/traits.properties");
+        prop.load(input);
+        String select = "SELECT MatchID,PUUID,Classement,";
+        int taille = Integer.parseInt(prop.getProperty("nbTraits"));
+        for (int i=0;i<taille;i++) {
+            select += prop.getProperty("trait" + i);
+            if (i != taille-1) {
+                select+=",";
+            }
+        }
+        select += " FROM DetailsGame";
+        return select;
+    }
+    private String buildSelectString( String matchID) throws IOException {
+        Properties prop = new Properties();
+        InputStream input = riotApiRequester.class.getResourceAsStream("/traits.properties");
+        prop.load(input);
+        String select = "SELECT MatchID,PUUID,Classement,";
+        int taille = Integer.parseInt(prop.getProperty("nbTraits"));
+        for (int i=0;i<taille;i++) {
+            select += prop.getProperty("trait" + i);
+            if (i != taille-1) {
+                select+=",";
+            }
+        }
+        select += " FROM DetailsGame where MatchID = ";
+        select += matchID;
+        System.out.println(select);
+        return select;
+    }
+    private String buildinsertMatchDetailsToDetailsGame() throws IOException {
+        Properties prop = new Properties();
+        InputStream input = riotApiRequester.class.getResourceAsStream("/traits.properties");
+        prop.load(input);
+        String select = "insert into DetailsGame (MatchID,PUUID,Classement,Augment1,Augment2,Augment3,";
+        int taille = Integer.parseInt(prop.getProperty("nbTraits"));
+        for (int i=0;i<taille;i++) {
+            select += prop.getProperty("trait" + i);
+            if (i != taille-1) {
+                select+=",";
+            }
+        }
+        select += ") values(?,?,?,?,?,?,";
+        for (int i=0;i<taille;i++) {
+            select += "?";
+            if (i != taille-1) {
+                select+=",";
+            }
+        }
+        select += ")";
+        System.out.println(select);
+        return select;
+    }
+    public void clearMatchsDetails() throws SQLException {
+        Connection cnx = database.openCo();
+        Statement rqt = cnx.createStatement();
+        Statement rqt2 = cnx.createStatement();
+        rqt.executeUpdate(clearDetailsGame);
+        rqt2.executeUpdate(clearMatchsChampGame);
+        cnx.close();
+    }
     private void generateTabTrait(traitFromApi[] traits) {
         for(int k=0; k<traits.length; k++) {
             // must insert null if not 3 augments taken
+
             TabTraits.replace(traitsFromAPIToDatabase.get(traits[k].name),traits[k].num_units);
+            System.out.println(traits[k].name);
+            System.out.println(traitsFromAPIToDatabase.get(traits[k].name));
+            System.out.println(traits[k].num_units);
         }
     }
     private void clearTabTrait() {
@@ -149,24 +247,32 @@ public class matchDetailsDAO {
     }
     public matchDetailsDAO() throws IOException {
         Properties prop = new Properties();
-        InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
+        InputStream input = riotApiRequester.class.getResourceAsStream("/traits.properties");
         prop.load(input);
-        for (int i=0;i<Integer.parseInt((String) prop.get("nbTraits"));i++) {
-            TabTraits.put((String)prop.get("trait"+i),0);
+        for (int i=0;i<Integer.parseInt(prop.getProperty("nbTraits"));i++) {
+            TabTraits.put(prop.getProperty("trait"+i),0);
         }
     }
     static {
         Properties prop = new Properties();
 
         try {
-            InputStream input = apiRequester.class.getResourceAsStream("/traits.properties");
+            InputStream input = riotApiRequester.class.getResourceAsStream("/traits.properties");
             System.out.println("input matchdetails: " + input);
             prop.load(input);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        for (int i = 0; i<Integer.parseInt((String) prop.get("nbTraits")); i++) {
-            traitsFromAPIToDatabase.put((String)prop.get("trait"+i),(String)prop.get("traitfromapi"+i));
+        for (int i = 0; i<Integer.parseInt(prop.getProperty("nbTraits")); i++) {
+            traitsFromAPIToDatabase.put(prop.getProperty("traitfromapi"+i),prop.getProperty("trait"+i));
+            System.out.println("*******************");
+            System.out.println("*******************");
+            System.out.println("*******************");
+            System.out.println(prop.getProperty("trait"+i));
+            System.out.println(prop.getProperty("traitfromapi"+i));
+            System.out.println("*******************");
+            System.out.println("*******************");
+            System.out.println("*******************");
         }
     }
 }
