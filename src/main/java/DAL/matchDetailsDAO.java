@@ -2,11 +2,15 @@ package DAL;
 
 import ApiObjects.matchFromApi;
 import ApiObjects.traitFromApi;
+import ApiObjects.traitFromJson;
 import BO.gameComp;
 import Scripts.riotApiRequester;
+import com.google.gson.Gson;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Properties;
 
 public class matchDetailsDAO {
+    protected static boolean jsonSerializeNulls = true;
     private static final String insertMatchDetailsToDetailsGame = "insert into DetailsGame (MatchID,PUUID,Classement,Augment1,Augment2,Augment3,"+
                                                                   "Ace,Admin,Aegis,AnimaSquad,Arsenal,Brawler,Civilian,Corrupted,Defender,Duelist,Forecaster,Gadgeteen,Hacker,Heart,LaserCorps,"+
                                                                   "Mascot,MechPrime,OxForce,Prankster,Recon,Renegade,SpellSlinger,StarGuardian,Supers,Sureshot,Threat,Underground)" +
@@ -28,9 +33,10 @@ public class matchDetailsDAO {
     private static final String clearDetailsGame= "DELETE FROM DetailsGame";
 
     private final HashMap<String,Integer> TabTraits = new LinkedHashMap<>();
+    private final HashMap<String,Integer> TabTraitsV2 = new LinkedHashMap<>();
     private static final HashMap<String,String> traitsFromAPIToDatabase = new HashMap<>();
     public void insert(matchFromApi match)throws SQLException {
-        insertDetailGame(match);
+        insertDetailGameV2(match);
         insertChampGame(match);
     }
     private void insertDetailGame(matchFromApi match) throws SQLException {
@@ -61,6 +67,45 @@ public class matchDetailsDAO {
                     System.out.println(TabTraits.get(key));*/
                     x++;
                 }
+                rqt.executeUpdate();
+                clearTabTrait();
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        finally {
+            cnx.close();
+        }
+    }
+
+    private void insertDetailGameV2(matchFromApi match) throws SQLException {
+        Connection cnx = database.openCo();
+        PreparedStatement rqt;
+        try {
+            rqt = cnx.prepareStatement(buildinsertMatchDetailsToDetailsGameV2());
+            for(int i =0; i<match.info.participants.length ; i++) {
+                rqt.setString(1,match.metadata.match_id);
+
+                rqt.setString(2,match.info.participants[i].puuid);
+
+                rqt.setInt(3,match.info.participants[i].placement);
+                for(int j =0; j<3 ; j++) {
+                    // must insert null if not 3 augments taken
+                    if (match.info.participants[i].augments.length > j) {
+                        rqt.setString(4 + j, match.info.participants[i].augments[j]);
+                    }
+                    else {
+                        rqt.setString(4 + j, null);
+                    }
+                }
+                generateTabTrait(match.info.participants[i].traits);
+                int x = 7;
+                for (String key : TabTraitsV2.keySet()) {
+                    rqt.setInt(x,TabTraitsV2.get(key));
+                    x++;
+                }
+                System.out.println("requete : ");
+                System.out.println(rqt);
                 rqt.executeUpdate();
                 clearTabTrait();
             }
@@ -224,6 +269,35 @@ public class matchDetailsDAO {
         System.out.println(select);
         return select;
     }
+    private String buildinsertMatchDetailsToDetailsGameV2() throws IOException {
+        String insert = "insert into DetailsGame (MatchID,PUUID,Classement,Augment1,Augment2,Augment3,";
+
+        Gson gson = Utils.jsonUtils.gson(jsonSerializeNulls);
+        InputStream is = setUpTables.class.getClassLoader().getResourceAsStream("DataDragon/tft-trait.json");
+        String json = IOUtils.toString(is, StandardCharsets.UTF_8);
+        traitFromJson traits = gson.fromJson(json, traitFromJson.class);
+        for (String key : traits.data.keySet()) {
+            System.out.println(traits.data.get(key).id);
+            insert +=  traits.data.get(key).id;
+            if (key != traits.data.lastKey()) {
+                insert += ", ";
+            } else {
+                insert += ")";
+            }
+        }
+        insert += "values (?,?,?,?,?,?,";
+        for (String key : traits.data.keySet()) {
+            System.out.println(traits.data.get(key).id);
+            insert +=  "?";
+            if (key != traits.data.lastKey()) {
+                insert += ",";
+            } else {
+                insert += ")";
+            }
+        }
+        System.out.println(insert);
+        return insert;
+    }
     public void clearMatchsDetails() throws SQLException {
         Connection cnx = database.openCo();
         Statement rqt = cnx.createStatement();
@@ -233,17 +307,19 @@ public class matchDetailsDAO {
         cnx.close();
     }
     private void generateTabTrait(traitFromApi[] traits) {
+        System.out.println("generateTabTrait");
         for(int k=0; k<traits.length; k++) {
-            // must insert null if not 3 augments taken
 
             TabTraits.replace(traitsFromAPIToDatabase.get(traits[k].name),traits[k].num_units);
             System.out.println(traits[k].name);
             System.out.println(traitsFromAPIToDatabase.get(traits[k].name));
             System.out.println(traits[k].num_units);
+            TabTraitsV2.replace(traits[k].name,traits[k].num_units);
         }
     }
     private void clearTabTrait() {
         TabTraits.replaceAll((key,old) -> 0);
+        TabTraitsV2.replaceAll((key,old) -> 0);
     }
     public matchDetailsDAO() throws IOException {
         Properties prop = new Properties();
@@ -252,6 +328,14 @@ public class matchDetailsDAO {
         for (int i=0;i<Integer.parseInt(prop.getProperty("nbTraits"));i++) {
             TabTraits.put(prop.getProperty("trait"+i),0);
         }
+        Gson gson = Utils.jsonUtils.gson(jsonSerializeNulls);
+        InputStream is = setUpTables.class.getClassLoader().getResourceAsStream("DataDragon/tft-trait.json");
+        String json = IOUtils.toString(is, StandardCharsets.UTF_8);
+        traitFromJson traits = gson.fromJson(json, traitFromJson.class);
+        for (String key : traits.data.keySet()) {
+            TabTraitsV2.put(traits.data.get(key).id,0);
+        }
+
     }
     static {
         Properties prop = new Properties();
@@ -265,14 +349,14 @@ public class matchDetailsDAO {
         }
         for (int i = 0; i<Integer.parseInt(prop.getProperty("nbTraits")); i++) {
             traitsFromAPIToDatabase.put(prop.getProperty("traitfromapi"+i),prop.getProperty("trait"+i));
-            System.out.println("*******************");
+           /* System.out.println("*******************");
             System.out.println("*******************");
             System.out.println("*******************");
             System.out.println(prop.getProperty("trait"+i));
             System.out.println(prop.getProperty("traitfromapi"+i));
             System.out.println("*******************");
             System.out.println("*******************");
-            System.out.println("*******************");
+            System.out.println("*******************");*/
         }
     }
 }

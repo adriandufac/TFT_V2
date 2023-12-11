@@ -1,6 +1,7 @@
 package Scripts;
 
 import ApiObjects.matchFromApi;
+import ApiObjects.participantFromApi;
 import DAL.matchDetailsDAO;
 import DAL.matchesDAO;
 import Utils.regionUtils;
@@ -12,6 +13,7 @@ import com.google.gson.*;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +38,7 @@ public class getMatchesDetailsFromRegion extends riotApiRequester {
         matchDetailsDAO matchDetailsDAO = new matchDetailsDAO();
         matchesDAO matchesDAO = new matchesDAO();
         List<String> matchesID = matchesDAO.selectmatchsIDSFromRegion(r);
+
         try (WebClient webClient = new WebClient()) {
             WebRequest webRequest;
             String URL2;
@@ -47,9 +50,12 @@ public class getMatchesDetailsFromRegion extends riotApiRequester {
                 //System.out.println(webRequest);
                 String jsonResponse;
                 jsonResponse = page.getWebResponse().getContentAsString();
+                System.out.println(jsonResponse);
                 //System.out.println(jsonResponse);
                 matchFromApi match = gson.fromJson(jsonResponse, matchFromApi.class);
-                //System.out.println(match.info.participants[0].puuid);
+                for(participantFromApi part : match.info.participants) {
+                    System.out.println(part.puuid);
+                }
                 matchDetailsDAO.insert(match);
                 cptrequest++;
                 if (cptrequest%100 == 0){

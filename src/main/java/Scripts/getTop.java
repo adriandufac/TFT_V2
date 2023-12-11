@@ -38,6 +38,8 @@ public class getTop extends riotApiRequester {
 
     /**
      * Retrieves PUUID of challengers players from the selected Region and insert into "Joueurs" table
+     * 1 request to get the list of challs and then 1 request for each player to get the PUUID
+     *
      * @param r
      * @throws IOException
      */

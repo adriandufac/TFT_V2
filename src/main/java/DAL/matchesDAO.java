@@ -15,19 +15,19 @@ public class matchesDAO {
     public void  insert(ArrayList<match> matches ) throws SQLException {
         Connection cnx = database.openCo();
         PreparedStatement rqt;
-            rqt = cnx.prepareStatement(insertMatch);
-            for (match match : matches){
-                try {
-                    rqt.setString(1, match.matchID);
-                    rqt.setString(2, match.r.toString());
-                    System.out.println("Inserting " + match.matchID);
-                    rqt.executeUpdate();
-                }
-                catch (Exception e) {
-                    System.out.println(e.getMessage());
-                }
+        rqt = cnx.prepareStatement(insertMatch);
+        for (match match : matches){
+            try {
+                rqt.setString(1, match.matchID);
+                rqt.setString(2, match.r.toString());
+                System.out.println("Inserting " + match.matchID);
+                rqt.executeUpdate();
             }
-            cnx.close();
+            catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        cnx.close();
     }
     public List<String> selectmatchsIDSFromRegion (Utils.regionUtils.region r){
         Connection cnx;

@@ -4,11 +4,12 @@ import Utils.regionUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.List;
 
 public class mainScript {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, SQLException, URISyntaxException {
 
         if ( "getTop".equals(args[0])) {
             getTop test = new getTop();
@@ -70,6 +71,16 @@ public class mainScript {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        if ( "setUpTables".equals(args[0])) {
+            setUpTables set = new setUpTables();
+            set.createDetailsGame();
+        }
+
+        if ( "setUpChamp".equals(args[0])) {
+            setUpTables set = new setUpTables();
+            set.fillChampion();
         }
 
     }
